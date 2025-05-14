@@ -8329,9 +8329,6 @@ spec:
                   - count
                   - template
                   type: object
-                  x-kubernetes-validations:
-                  - message: minCount should be positive and less or equal to count
-                    rule: 'has(self.minCount) ? self.minCount <= self.count : true'
                 maxItems: 8
                 minItems: 1
                 type: array
@@ -8379,9 +8376,6 @@ spec:
             required:
             - podSets
             type: object
-            x-kubernetes-validations:
-            - message: priority should not be nil when priorityClassName is set
-              rule: 'has(self.priorityClassName) ? has(self.priority) : true'
           status:
             description: WorkloadStatus defines the observed state of Workload
             properties:
@@ -8637,26 +8631,6 @@ spec:
                               type: object
                             maxItems: 8
                             type: array
-                            x-kubernetes-validations:
-                            - message: operator must be Exists when 'key' is empty,
-                                which means 'match all values and all keys'
-                              rule: 'self.all(x, !has(x.key) ? x.operator == ''Exists''
-                                : true)'
-                            - message: effect must be 'NoExecute' when 'tolerationSeconds'
-                                is set
-                              rule: 'self.all(x, has(x.tolerationSeconds) ? x.effect
-                                == ''NoExecute'' : true)'
-                            - message: 'supported toleration values: ''Equal''(default),
-                                ''Exists'''
-                              rule: self.all(x, !has(x.operator) || x.operator in
-                                ['Equal', 'Exists'])
-                            - message: a value must be empty when 'operator' is 'Exists'
-                              rule: 'self.all(x, has(x.operator) && x.operator ==
-                                ''Exists'' ? !has(x.value) : true)'
-                            - message: 'supported taint effect values: ''NoSchedule'',
-                                ''PreferNoSchedule'', ''NoExecute'''
-                              rule: self.all(x, !has(x.effect) || x.effect in ['NoSchedule',
-                                'PreferNoSchedule', 'NoExecute'])
                         required:
                         - name
                         type: object
@@ -8838,34 +8812,6 @@ spec:
                 x-kubernetes-list-type: map
             type: object
         type: object
-        x-kubernetes-validations:
-        - message: podSetAssignments must have the same number of podSets as the spec
-          rule: 'has(self.status) && has(self.status.conditions) && self.status.conditions.exists(c,
-            c.type == ''QuotaReserved'' && c.status == ''True'') && has(self.status.admission)
-            ? size(self.spec.podSets) == size(self.status.admission.podSetAssignments)
-            : true'
-        - message: field is immutable
-          rule: '(has(oldSelf.status) && has(oldSelf.status.conditions) && oldSelf.status.conditions.exists(c,
-            c.type == ''QuotaReserved'' && c.status == ''True'')) ? (oldSelf.spec.priorityClassSource
-            == self.spec.priorityClassSource) : true'
-        - message: field is immutable
-          rule: '(has(oldSelf.status) && has(oldSelf.status.conditions) && oldSelf.status.conditions.exists(c,
-            c.type == ''QuotaReserved'' && c.status == ''True'') && has(oldSelf.spec.priorityClassName)
-            && has(self.spec.priorityClassName)) ? (oldSelf.spec.priorityClassName
-            == self.spec.priorityClassName) : true'
-        - message: field is immutable
-          rule: '(has(oldSelf.status) && has(oldSelf.status.conditions) && oldSelf.status.conditions.exists(c,
-            c.type == ''QuotaReserved'' && c.status == ''True'')) && (has(self.status)
-            && has(self.status.conditions) && self.status.conditions.exists(c, c.type
-            == ''QuotaReserved'' && c.status == ''True'')) && has(oldSelf.spec.queueName)
-            && has(self.spec.queueName) ? oldSelf.spec.queueName == self.spec.queueName
-            : true'
-        - message: maximumExecutionTimeSeconds is immutable while admitted
-          rule: ((has(oldSelf.status) && has(oldSelf.status.conditions) && oldSelf.status.conditions.exists(c,
-            c.type == 'Admitted' && c.status == 'True')) && (has(self.status) && has(self.status.conditions)
-            && self.status.conditions.exists(c, c.type == 'Admitted' && c.status ==
-            'True')))?((has(oldSelf.spec.maximumExecutionTimeSeconds)?oldSelf.spec.maximumExecutionTimeSeconds:0)
-            ==  (has(self.spec.maximumExecutionTimeSeconds)?self.spec.maximumExecutionTimeSeconds:0)):true
     served: true
     storage: true
     subresources:
